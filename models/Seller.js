@@ -31,8 +31,8 @@ const sellerSchema = new mongoose.Schema({
   },
   location: {
     type: String,
-    required: [true, 'Product posting location is required'],
-    trim: true
+    trim: true,
+    default: ''
   },
   password: {
     type: String,

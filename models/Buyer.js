@@ -26,8 +26,8 @@ const buyerSchema = new mongoose.Schema({
   },
   location: {
     type: String,
-    required: [true, 'Location is required'],
-    trim: true
+    trim: true,
+    default: ''
   },
   password: {
     type: String,
