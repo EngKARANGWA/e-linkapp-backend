@@ -13,19 +13,21 @@ router.post('/', Upload, async (req, res) => {
             return res.status(400).json({ message: 'Payment reference image is required' });
         }
 
-        // Get Cloudinary details from the uploaded file
-        const paymentReference = {
-            public_id: req.file.filename,
-            url: req.file.path
-        };
-        const result = await cloudinary.uploader.upload(paymentReference.url, { public_id: paymentReference.public_id });
-        paymentReference.url = result.secure_url;
-        // Create new payment with proper image reference
+        // Convert buffer to base64
+        const b64 = Buffer.from(req.file.buffer).toString('base64');
+        const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+
+        // Upload to Cloudinary
+        const result = await cloudinary.uploader.upload(dataURI);
+
         const payment = new Payment({
-            amount: Number(amount), // Convert amount to number
+            amount: Number(amount),
             paymentMethod,
             paymentTiming,
-            paymentReference
+            paymentReference: {
+                public_id: result.public_id,
+                url: result.secure_url
+            }
         });
 
         const savedPayment = await payment.save();
@@ -92,6 +94,24 @@ router.get('/:id', async (req, res) => {
         res.status(500).json({
             success: false,
             message: error.message || 'Error fetching payment'
+        });
+    }
+});
+
+// Get all payments
+router.get('/', async (req, res) => {
+    try {
+        const payments = await Payment.find().sort({ createdAt: -1 });
+        res.json({
+            success: true,
+            count: payments.length,
+            payments
+        });
+    } catch (error) {
+        console.error('Fetch payments error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Error fetching payments'
         });
     }
 });
