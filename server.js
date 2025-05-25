@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
 
 // Load environment variables
 dotenv.config();
@@ -29,6 +31,9 @@ app.use('/api/buyers', require('./routes/buyerRoutes'));
 app.use('/api/sellers', require('./routes/sellerRoutes'));
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/payments', require('./routes/paymentRoutes'));
+// Swagger documentation route (add before error handlers)
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -39,4 +44,4 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-}); 
+});

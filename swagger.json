@@ -1,0 +1,540 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ELink API Documentation",
+    "version": "1.0.0",
+    "description": "API documentation for ELink system"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000",
+      "description": "Development server"
+    },
+    {
+      "url": "https://e-linkapp-backend.onrender.com",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/api/buyers/register": {
+      "post": {
+        "tags": ["Buyers"],
+        "summary": "Register new buyer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "John Doe"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "john@example.com"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "+250789123456"
+                  },
+                  "address": {
+                    "type": "string",
+                    "example": "KG 123 St"
+                  },
+                  "location": {
+                    "type": "string",
+                    "example": "Kigali, Rwanda"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "StrongPass123!"
+                  }
+                },
+                "required": ["name", "email", "phone", "address", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Buyer registered successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/api/buyers/login": {
+      "post": {
+        "tags": ["Buyers"],
+        "summary": "Buyer login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/api/sellers/register": {
+      "post": {
+        "tags": ["Sellers"],
+        "summary": "Register new seller",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Business Name"
+                  },
+                  "businessName": {
+                    "type": "string",
+                    "example": "Tech Store"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "business@example.com"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "example": "+250722123456"
+                  },
+                  "businessAddress": {
+                    "type": "string",
+                    "example": "KN 78 St"
+                  },
+                  "location": {
+                    "type": "string",
+                    "example": "Kigali, Rwanda"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "SecurePass456!"
+                  }
+                },
+                "required": ["name", "businessName", "email", "phone", "businessAddress", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Seller registered successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/api/products": {
+      "post": {
+        "tags": ["Products"],
+        "summary": "Create new product",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Product Name"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Product Description"
+                  },
+                  "price": {
+                    "type": "number",
+                    "example": 99.99
+                  },
+                  "category": {
+                    "type": "string",
+                    "example": "Electronics"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": ["name", "description", "price", "category", "image"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product created successfully"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      },
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get all products",
+        "responses": {
+          "200": {
+            "description": "List of products"
+          }
+        }
+      }
+    },
+    "/api/products/{id}": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get product by ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product details"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Products"],
+        "summary": "Delete product",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product deleted"
+          },
+          "404": {
+            "description": "Product not found"
+          }
+        }
+      }
+    },
+    "/api/payments": {
+      "post": {
+        "tags": ["Payments"],
+        "summary": "Create a new payment",
+        "description": "Process a new payment with image upload",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "example": 299.99
+                  },
+                  "paymentMethod": {
+                    "type": "string",
+                    "enum": ["Cash", "Bank Transfer", "Mobile Payment", "Credit Card"]
+                  },
+                  "paymentTiming": {
+                    "type": "string",
+                    "enum": ["Pay Now", "Pay Later"]
+                  },
+                  "paymentReference": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": ["amount", "paymentMethod", "paymentTiming", "paymentReference"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Payment processed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Payment processed successfully"
+                    },
+                    "payment": {
+                      "type": "object",
+                      "properties": {
+                        "orderId": {
+                          "type": "string",
+                          "example": "646f12345678901234567890"
+                        },
+                        "amount": {
+                          "type": "number",
+                          "example": 299.99
+                        },
+                        "paymentMethod": {
+                          "type": "string",
+                          "example": "Bank Transfer"
+                        },
+                        "paymentReference": {
+                          "type": "string",
+                          "example": "https://res.cloudinary.com/..."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "get": {
+        "tags": ["Payments"],
+        "summary": "Get all payments",
+        "description": "Retrieve all payments sorted by creation date",
+        "responses": {
+          "200": {
+            "description": "List of payments retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "count": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "payments": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "string"
+                          },
+                          "amount": {
+                            "type": "number"
+                          },
+                          "paymentMethod": {
+                            "type": "string"
+                          },
+                          "paymentTiming": {
+                            "type": "string"
+                          },
+                          "paymentReference": {
+                            "type": "object",
+                            "properties": {
+                              "public_id": {
+                                "type": "string"
+                              },
+                              "url": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/payments/{id}": {
+      "get": {
+        "tags": ["Payments"],
+        "summary": "Get payment by ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Payment ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment found"
+          },
+          "404": {
+            "description": "Payment not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Payments"],
+        "summary": "Delete payment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Payment ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment deleted successfully"
+          },
+          "404": {
+            "description": "Payment not found"
+          }
+        }
+      }
+    },
+    "/api/sellers/login": {
+      "post": {
+        "tags": ["Sellers"],
+        "summary": "Seller login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "business@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "SecurePass456!"
+                  }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "seller": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "businessName": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
+}

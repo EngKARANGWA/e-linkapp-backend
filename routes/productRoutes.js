@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/productModel');
-const Upload = require('../config/multer');
-const cloudinary = require('../config/cloudinary');
-
+const { upload, cloudinary } = require('../config/cloudinary');
 
 // Get all products
 router.get('/', async (req, res) => {
@@ -16,27 +14,49 @@ router.get('/', async (req, res) => {
 });
 
 // Create a new product
-router.post('/', Upload, async (req, res) => {
+router.post('/', upload.single('image'), async (req, res) => {
   try {
     const { name, description, price, category } = req.body;
 
-    if (!req.file) {
-      return res.status(400).json({ message: 'Product image is required' });
+    // Validate required fields
+    if (!name || !description || !price || !category) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'All fields are required' 
+      });
     }
 
-    const result = await cloudinary.uploader.upload(req.file.path, { public_id: req.file.filename });
+    if (!req.file) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Product image is required' 
+      });
+    }
+
     const product = new Product({
       name,
       description,
-      price,
+      price: Number(price),
       category,
-      image: result.secure_url,
+      image: {
+        public_id: req.file.filename,
+        url: req.file.path
+      }
     });
 
     const savedProduct = await product.save();
-    res.status(201).json(savedProduct);
+
+    res.status(201).json({
+      success: true,
+      message: 'Product created successfully',
+      product: savedProduct
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Product creation error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error creating product'
+    });
   }
 });
 
@@ -54,27 +74,47 @@ router.get('/:id', async (req, res) => {
 });
 
 // Update product
-router.put('/:id', Upload, async (req, res) => {
+router.put('/:id', upload.single('image'), async (req, res) => {
   try {
-    const { name, description, price, category } = req.body;
-    const updateData = { name, description, price, category };
-    
-    if (req.file) {
-      updateData.image = req.file.path;
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
     }
 
-    const product = await Product.findByIdAndUpdate(
+    const updates = { ...req.body };
+
+    if (req.file) {
+      // Delete old image from Cloudinary
+      if (product.image.public_id) {
+        await cloudinary.uploader.destroy(product.image.public_id);
+      }
+
+      updates.image = {
+        public_id: req.file.filename,
+        url: req.file.path
+      };
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
-      updateData,
+      updates,
       { new: true }
     );
 
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-    res.json(product);
+    res.json({
+      success: true,
+      message: 'Product updated successfully',
+      product: updatedProduct
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Update error:', error);
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Error updating product'
+    });
   }
 });
 
