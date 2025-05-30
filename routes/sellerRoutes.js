@@ -85,52 +85,62 @@ router.post('/register', async (req, res) => {
 
 // Login seller
 router.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-        // Find seller by email
-        const seller = await Seller.findOne({ email });
-        if (!seller) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid email or password'
-            });
-        }
-
-        // Verify password
-        const isMatch = await seller.comparePassword(password);
-        if (!isMatch) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid email or password'
-            });
-        }
-
-        // Generate JWT token
-        const token = jwt.sign(
-            { id: seller._id, email: seller.email },
-            process.env.JWT_SECRET,
-            { expiresIn: '24h' }
-        );
-
-        res.json({
-            success: true,
-            message: 'Login successful',
-            token,
-            seller: {
-                id: seller._id,
-                name: seller.name,
-                businessName: seller.businessName,
-                email: seller.email
-            }
-        });
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error during login'
-        });
+    // Input validation
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email and password'
+      });
     }
+
+    // Find seller
+    const seller = await Seller.findOne({ email: email.toLowerCase() });
+    if (!seller) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    // Check password
+    const isMatch = await seller.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    // Generate token
+    const token = jwt.sign(
+      { id: seller._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    // Send response
+    res.json({
+      success: true,
+      message: 'Login successful',
+      token,
+      seller: {
+        id: seller._id,
+        name: seller.name,
+        businessName: seller.businessName,
+        email: seller.email
+      }
+    });
+
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error logging in'
+    });
+  }
 });
 
 // Get seller profile using email and password
